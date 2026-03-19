@@ -1,0 +1,14 @@
+# Virtual environment — never push this to GitHub
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
