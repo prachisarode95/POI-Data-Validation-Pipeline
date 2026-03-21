@@ -8,7 +8,7 @@
 | **Cleaning** | Filtered to 8,004 valid point geometries with structured schema |
 | **Validation** | Applied 5 QA rules — flagged 648 records as FAIL (8.1%) |
 | **Enrichment** | Mapped OSM tags to 3-tier category hierarchy |
-| **Export** | Produced map-ready GeoJSON + full validation report CSV |
+| **Export** | Produced GeoJSON + validation report CSV |
 
 ---
 
