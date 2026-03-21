@@ -14,7 +14,6 @@
 
 ## Tools & Libraries
 
-- **Python 3** — core scripting
 - **osmnx** — OpenStreetMap POI data collection
 - **geopandas** — spatial data processing
 - **pandas** — data cleaning and validation logic
@@ -24,13 +23,5 @@
 **Validation Results:**
 - PASS : 7,356 POIs (91.9%)
 - FAIL : 648 POIs (8.1%)
-
----
-
-## Output Files
-
-- `bengaluru_poi_validation_report.csv`
-- `bengaluru_poi_map_ready.geojson`
-- `bengaluru_poi_final.csv`
 
 ---
