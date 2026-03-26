@@ -1,20 +1,6 @@
 # =============================================================================
-# Bengaluru POI Data Validation & Quality Report Pipeline
+#               POI Data Validation & Quality Analysis
 # =============================================================================
-# Description : Fetches real POI data from OpenStreetMap for Bengaluru,
-#               applies 5 QA validation rules, enriches with TomTom-style
-#               category hierarchy, and exports map-ready GeoJSON + CSV reports.
-#
-# Output Files:
-#   output/bengaluru_poi_map_ready.geojson
-#   reports/bengaluru_poi_validation_report.csv
-#   reports/bengaluru_poi_final.csv
-#
-# Author      : Prachi Sarode
-# Date        : March 2026
-# Tools       : Python, osmnx, geopandas, pandas
-# =============================================================================
-
 import os
 import warnings
 import osmnx as ox
@@ -57,7 +43,6 @@ BBOX = {
     'lon_max': 77.9
 }
 
-# TomTom-style category hierarchy
 # Format → amenity : (main_category, sub_category, priority_level)
 # Priority: 1 = Emergency/Essential, 2 = Important daily-use, 3 = General
 CATEGORY_MAP = {
@@ -72,7 +57,7 @@ CATEGORY_MAP = {
 }
 
 # =============================================================================
-# PHASE 1 — DATA COLLECTION
+# STEP 1 — DATA COLLECTION
 # =============================================================================
 
 print("[ Phase 1 ] Fetching POI data from OpenStreetMap ...")
@@ -82,7 +67,7 @@ raw_poi = ox.features_from_place(CITY_NAME, tags=POI_TAGS)
 print(f"           Raw POIs fetched : {len(raw_poi)}")
 
 # =============================================================================
-# PHASE 2 — CLEAN & STRUCTURE
+# STEP 2 — CLEAN & STRUCTURE
 # =============================================================================
 
 print("[ Phase 2 ] Cleaning and structuring data ...")
@@ -107,7 +92,7 @@ poi_clean = poi_clean[['poi_id', 'name', 'amenity', 'latitude', 'longitude', 'ge
 print(f"           POIs after cleaning : {len(poi_clean)}")
 
 # =============================================================================
-# PHASE 3 — VALIDATION & QA FLAGGING
+# STEP 3 — VALIDATION & QA FLAGGING
 # =============================================================================
 
 print("[ Phase 3 ] Running validation rules ...")
@@ -188,10 +173,10 @@ print(f"           FAIL   : {failed} ({round(failed/total*100,1)}%)")
 print(f"           REVIEW : {review} ({round(review/total*100,1)}%)")
 
 # =============================================================================
-# PHASE 4 — CATEGORIZE & ENRICH
+# STEP 4 — CATEGORIZE & ENRICH
 # =============================================================================
 
-print("[ Phase 4 ] Applying TomTom-style category enrichment ...")
+print("[ Phase 4 ] Applying 3-tier category enrichment ...")
 
 poi_enriched = poi_validated.copy()
 
@@ -208,12 +193,12 @@ poi_enriched['map_ready'] = poi_enriched['final_status'].map(
     lambda s: 'YES' if s == 'PASS' else 'NO')
 
 # =============================================================================
-# PHASE 5 — EXPORT OUTPUT FILES
+# STEP 5 — EXPORT OUTPUT FILES
 # =============================================================================
 
 print("[ Phase 5 ] Exporting output files ...")
 
-# --- Export 1: Map-ready GeoJSON (PASS only) → output folder ---
+# --- Export 1: Map-ready GeoJSON (PASS only) to output folder ---
 poi_map_ready = poi_enriched[poi_enriched['map_ready'] == 'YES'].copy()
 
 geojson_cols = [
@@ -232,7 +217,7 @@ geojson_path = os.path.join('output', 'bengaluru_poi_map_ready.geojson')
 poi_map_ready_geo.to_file(geojson_path, driver='GeoJSON')
 print(f"           Saved : {geojson_path}  ({len(poi_map_ready_geo)} POIs)")
 
-# --- Export 2: Validation report CSV → reports folder ---
+# --- Export 2: Validation report CSV to reports folder ---
 validation_report_cols = [
     'poi_id', 'name', 'amenity', 'latitude', 'longitude',
     'rule1_status', 'rule1_reason',
@@ -247,7 +232,7 @@ validation_report_path = os.path.join('reports', 'bengaluru_poi_validation_repor
 poi_enriched[validation_report_cols].to_csv(validation_report_path, index=False)
 print(f"           Saved : {validation_report_path}  ({total} rows)")
 
-# --- Export 3: Final enriched CSV → reports folder ---
+# --- Export 3: Final enriched CSV to reports folder ---
 final_csv_cols = [
     'poi_id', 'name', 'amenity',
     'main_category', 'sub_category', 'priority_level',
@@ -265,16 +250,11 @@ print(f"           Saved : {final_csv_path}  ({total} rows)")
 # FINAL SUMMARY
 # =============================================================================
 
-print()
-print("=" * 55)
-print("  BENGALURU POI QUALITY PIPELINE — COMPLETE")
-print("=" * 55)
 print(f"  Total POIs processed  : {total}")
 print(f"  Map-ready (PASS)      : {passed} ({round(passed/total*100,1)}%)")
 print(f"  Failed validation     : {failed} ({round(failed/total*100,1)}%)")
-print()
+
 print("  Output Files:")
 print(f"    {geojson_path}")
 print(f"    {validation_report_path}")
 print(f"    {final_csv_path}")
-print("=" * 55)
